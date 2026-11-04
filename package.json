@@ -1,0 +1,43 @@
+{
+  "name": "openclaw-local-user-sandbox",
+  "version": "0.1.1",
+  "description": "OpenClaw sandbox backend that runs tools on the Gateway host as an unprivileged local user.",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Will-Xv/openclaw-local-user-sandbox.git"
+  },
+  "homepage": "https://github.com/Will-Xv/openclaw-local-user-sandbox#readme",
+  "keywords": [
+    "openclaw",
+    "openclaw-plugin",
+    "sandbox",
+    "security"
+  ],
+  "peerDependencies": {
+    "openclaw": ">=2026.10.10"
+  },
+  "peerDependenciesMeta": {
+    "openclaw": {
+      "optional": true
+    }
+  },
+  "openclaw": {
+    "extensions": [
+      "./index.js"
+    ],
+    "compat": {
+      "pluginApi": ">=2026.10.10"
+    },
+    "build": {
+      "openclawVersion": "2026.10.10"
+    }
+  },
+  "files": [
+    "index.js",
+    "src/**",
+    "openclaw.plugin.json",
+    "README.md"
+  ]
+}

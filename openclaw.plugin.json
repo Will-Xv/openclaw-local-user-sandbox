@@ -1,0 +1,37 @@
+{
+  "id": "local-user-sandbox",
+  "name": "Local User Sandbox",
+  "description": "Sandbox backend that runs exec and file tools on the Gateway host as an unprivileged local user",
+  "categories": ["security"],
+  "activation": {
+    "onStartup": true
+  },
+  "uiHints": {
+    "uid": {
+      "label": "Sandbox UID",
+      "help": "Numeric user id the tools run as (default: 10001). It needs no /etc/passwd entry and must not be 0."
+    },
+    "gid": {
+      "label": "Sandbox GID",
+      "help": "Numeric group id the tools run as (default: same as uid)."
+    },
+    "home": {
+      "label": "Home Directory",
+      "help": "HOME for sandboxed commands (default: /data/.sandbox-home). Keep it outside the OpenClaw state directory."
+    },
+    "path": {
+      "label": "PATH",
+      "help": "PATH for sandboxed commands (default: /usr/local/bin:/usr/bin:/bin)."
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "uid": { "type": "integer", "minimum": 1 },
+      "gid": { "type": "integer", "minimum": 1 },
+      "home": { "type": "string" },
+      "path": { "type": "string" }
+    }
+  }
+}
