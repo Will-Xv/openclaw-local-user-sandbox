@@ -56,8 +56,10 @@ Also set Code Mode to the QuickJS executor. The default Node executor runs guest
 ## Install
 
 ```bash
-openclaw plugins install <package or npm-pack:path/to/openclaw-local-user-sandbox-0.1.2.tgz> --force --accept-capabilities
+openclaw plugins install clawhub:@will-xv/local-user-sandbox --force --accept-capabilities
 ```
+
+The ClawHub package is `@will-xv/local-user-sandbox`. To install a local build instead, use `npm-pack:path/to/will-xv-local-user-sandbox-0.1.2.tgz`.
 
 ```json5
 {
@@ -80,8 +82,10 @@ Check with `openclaw sandbox explain --session <key>`: it should show `backend: 
 
 0.1.1 used the plugin id `local-user-sandbox`. The OpenClaw CLI loads a sandbox backend's plugin only when the plugin id equals the backend id, so `openclaw sandbox list` and `openclaw sandbox recreate` could not reach it. 0.1.2 renames the plugin to `local-user`. The backend id and the `agents` sandbox config are unchanged.
 
+ClawHub does not allow a published package to change its plugin id, so 0.1.2 is published as a new package, `@will-xv/local-user-sandbox`. The old ClawHub package `openclaw-local-user-sandbox` (0.1.1) has been withdrawn.
+
 ```bash
-openclaw plugins uninstall local-user-sandbox --force && openclaw plugins install <package or npm-pack:path/to/openclaw-local-user-sandbox-0.1.2.tgz> --force --accept-capabilities
+openclaw plugins uninstall local-user-sandbox --force && openclaw plugins install clawhub:@will-xv/local-user-sandbox --force --accept-capabilities
 openclaw config unset plugins.entries.local-user-sandbox
 ```
 
@@ -116,8 +120,8 @@ OpenClaw 2026.10.10 on Railway with a Discord channel, Claude Opus and Haiku, Co
 
 ## Changes
 
-- 0.1.2: plugin id renamed from `local-user-sandbox` to `local-user` so the CLI loads the backend. See "Upgrading from 0.1.1".
-- 0.1.1: first public release.
+- 0.1.2: plugin id renamed from `local-user-sandbox` to `local-user` so the CLI loads the backend; ClawHub package renamed to `@will-xv/local-user-sandbox`. See "Upgrading from 0.1.1".
+- 0.1.1: first public release (ClawHub package `openclaw-local-user-sandbox`).
 
 ## License
 
