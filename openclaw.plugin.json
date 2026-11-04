@@ -1,5 +1,5 @@
 {
-  "id": "local-user-sandbox",
+  "id": "local-user",
   "name": "Local User Sandbox",
   "description": "Sandbox backend that runs exec and file tools on the Gateway host as an unprivileged local user",
   "categories": ["security"],

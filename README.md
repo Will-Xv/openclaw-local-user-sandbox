@@ -56,7 +56,7 @@ Also set Code Mode to the QuickJS executor. The default Node executor runs guest
 ## Install
 
 ```bash
-openclaw plugins install <package or npm-pack:path/to/openclaw-local-user-sandbox-0.1.1.tgz> --force --accept-capabilities
+openclaw plugins install <package or npm-pack:path/to/openclaw-local-user-sandbox-0.1.2.tgz> --force --accept-capabilities
 ```
 
 ```json5
@@ -74,11 +74,22 @@ openclaw plugins install <package or npm-pack:path/to/openclaw-local-user-sandbo
 }
 ```
 
-Check with `openclaw sandbox explain --session <key>`: it should show `backend: local-user` and `runtimeWorkdir: (direct host)`.
+Check with `openclaw sandbox explain --session <key>`: it should show `backend: local-user` and the agent workspace as `runtimeWorkdir`. After the first sandboxed turn, `openclaw sandbox list` shows the runtime as running.
+
+## Upgrading from 0.1.1
+
+0.1.1 used the plugin id `local-user-sandbox`. The OpenClaw CLI loads a sandbox backend's plugin only when the plugin id equals the backend id, so `openclaw sandbox list` and `openclaw sandbox recreate` could not reach it. 0.1.2 renames the plugin to `local-user`. The backend id and the `agents` sandbox config are unchanged.
+
+```bash
+openclaw plugins uninstall local-user-sandbox --force && openclaw plugins install <package or npm-pack:path/to/openclaw-local-user-sandbox-0.1.2.tgz> --force --accept-capabilities
+openclaw config unset plugins.entries.local-user-sandbox
+```
+
+Move any settings from `plugins.entries.local-user-sandbox.config` to `plugins.entries.local-user.config`, then restart the Gateway.
 
 ## Configuration
 
-`plugins.entries.local-user-sandbox.config`:
+`plugins.entries.local-user.config`:
 
 | Key | Default | Meaning |
 |---|---|---|
@@ -89,7 +100,7 @@ Check with `openclaw sandbox explain --session <key>`: it should show `backend: 
 
 ## Known limitations
 
-- A standalone CLI process (`openclaw sandbox list`, `openclaw sandbox recreate`) does not load this plugin, so it reports `Sandbox backend "local-user" is unavailable` or shows the runtime as stopped. Nothing is lost: there is no runtime to remove, and removal is a no-op that never touches the workspace.
+- `openclaw sandbox recreate` only drops the runtime record. There is nothing else to remove, and it never touches the workspace.
 - The plugin changes ownership of the workspace to the sandbox uid and tightens permissions on the OpenClaw directories listed above. The root Gateway is unaffected.
 
 ## Tested
@@ -101,6 +112,12 @@ OpenClaw 2026.10.10 on Railway with a Discord channel, Claude Opus and Haiku, Co
 - A fact saved to `MEMORY.md` in one session was in the next session's context with no tools and no sync step.
 - A root-owned `0600` file in the workspace was handed over and edited by the agent.
 - Directories set to `755` for the test were tightened to `700` and blocked.
+- 0.1.2: `openclaw sandbox list` shows the runtime as running, and `openclaw sandbox recreate --all --force` removes it without errors; the next turn provisions it again and the self-test passes.
+
+## Changes
+
+- 0.1.2: plugin id renamed from `local-user-sandbox` to `local-user` so the CLI loads the backend. See "Upgrading from 0.1.1".
+- 0.1.1: first public release.
 
 ## License
 

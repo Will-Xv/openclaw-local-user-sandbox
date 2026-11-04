@@ -9,7 +9,7 @@ import {
 } from "./src/backend.js";
 
 export default definePluginEntry({
-	id: "local-user-sandbox",
+	id: "local-user",
 	name: "Local User Sandbox",
 	description: "Sandbox backend that runs exec and file tools on the Gateway host as an unprivileged local user",
 	register(api) {
@@ -21,7 +21,7 @@ export default definePluginEntry({
 			resolveWorkdir: resolveLocalUserSandboxWorkdir
 		});
 		api.lifecycle.registerRuntimeLifecycle({
-			id: "local-user-sandbox-cleanup",
+			id: "local-user-cleanup",
 			cleanup: ({ reason, sessionKey, runId }) => {
 				if (sessionKey !== undefined || runId !== undefined) return;
 				if (reason === "disable" || reason === "restart") unregister();
