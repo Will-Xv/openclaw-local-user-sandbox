@@ -29,9 +29,11 @@ This backend keeps the agent workspace where it is and only changes **who** runs
 Each time a sandbox is provisioned the plugin:
 
 1. Refuses to run unless the Gateway is root (switching users needs it).
-2. Creates the sandbox `HOME` (mode 700, owned by the sandbox uid) outside the OpenClaw state directory.
-3. Hands workspace files that are not owned by the sandbox uid over to it (`chown -h`, symlinks are not followed), so files the Gateway wrote as root stay usable.
-4. The first time per workspace, removes group/other access from root-owned OpenClaw directories (state directory, `<state>.update-captures`, the OpenClaw temp/log directory), then runs a self-test **as the sandbox user**: if it can read the Gateway's process environment or any of those directories, or cannot write the workspace, the backend refuses to start.
+2. Checks the workspace and the sandbox `HOME` before changing anything. Each must be a real directory path (no symlinks) that neither contains nor sits inside a protected OpenClaw directory (state directory, `<state>.update-captures`, the OpenClaw temp/log directory), and every directory above it must be root-owned and not writable by group or others, so the sandbox user cannot swap it for a symlink. Otherwise the backend refuses to start.
+3. Creates the sandbox `HOME` (mode 700, owned by the sandbox uid).
+4. Removes group/other access from the protected directories, then runs a self-test **as the sandbox user**: if it can read the Gateway's process environment or any protected directory, the backend refuses to start.
+5. Hands workspace files that are not owned by the sandbox uid over to it, so files the Gateway wrote as root stay usable. It uses `find -P … -execdir chown -h`: symlinks are never followed, and swapping a directory for a symlink during the walk cannot redirect it. Files with more than one hard link are skipped, since they may share an inode with a file outside the workspace.
+6. Checks as the sandbox user that the workspace is writable.
 
 ## Security model
 
@@ -59,7 +61,7 @@ Also set Code Mode to the QuickJS executor. The default Node executor runs guest
 openclaw plugins install clawhub:@will-xv/local-user-sandbox --force --accept-capabilities
 ```
 
-The ClawHub package is `@will-xv/local-user-sandbox`. To install a local build instead, use `npm-pack:path/to/will-xv-local-user-sandbox-0.1.2.tgz`.
+The ClawHub package is `@will-xv/local-user-sandbox`. To install a local build instead, use `npm-pack:path/to/will-xv-local-user-sandbox-0.1.3.tgz`.
 
 ```json5
 {
@@ -105,7 +107,7 @@ Move any settings from `plugins.entries.local-user-sandbox.config` to `plugins.e
 ## Known limitations
 
 - `openclaw sandbox recreate` only drops the runtime record. There is nothing else to remove, and it never touches the workspace.
-- The plugin changes ownership of the workspace to the sandbox uid and tightens permissions on the OpenClaw directories listed above. The root Gateway is unaffected.
+- The plugin changes ownership of the workspace to the sandbox uid and tightens permissions on the OpenClaw directories listed above. The root Gateway is unaffected. These changes stay after the plugin is disabled or uninstalled.
 
 ## Tested
 
@@ -117,8 +119,11 @@ OpenClaw 2026.10.10 on Railway with a Discord channel, Claude Opus and Haiku, Co
 - A root-owned `0600` file in the workspace was handed over and edited by the agent.
 - Directories set to `755` for the test were tightened to `700` and blocked.
 - 0.1.2: `openclaw sandbox list` shows the runtime as running, and `openclaw sandbox recreate --all --force` removes it without errors; the next turn provisions it again and the self-test passes.
+- 0.1.3, attack bench in a throwaway container with a decoy state directory: a workspace of `/data` (containing the state directory) and a `HOME` symlinked into the state directory are refused before anything changes owner; a root file hard-linked into the workspace keeps its owner; with the sandbox user swapping a workspace directory for a symlink to the decoy in a loop, 200 provisions handed over all 400 workspace files every time and none of the 400 decoy files. 0.1.2 handed 391 decoy files to the sandbox uid in the same race test.
 
 ## Changes
+
+- 0.1.3: security fixes from the ClawHub audit. Path checks now run before any ownership change, resolve symlinks, and reject a workspace or `HOME` that contains a protected directory as well as one inside it. The ownership handover uses `find -execdir` so a symlink swapped in during the walk cannot redirect it, and skips hard-linked files. The self-test runs on every provision, before the handover.
 
 - 0.1.2: plugin id renamed from `local-user-sandbox` to `local-user` so the CLI loads the backend; ClawHub package renamed to `@will-xv/local-user-sandbox`. See "Upgrading from 0.1.1".
 - 0.1.1: first public release (ClawHub package `openclaw-local-user-sandbox`).

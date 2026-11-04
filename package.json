@@ -1,6 +1,6 @@
 {
   "name": "@will-xv/local-user-sandbox",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "OpenClaw sandbox backend that runs tools on the Gateway host as an unprivileged local user.",
   "type": "module",
   "license": "MIT",
